@@ -182,12 +182,12 @@ def main():
                 if fingers[0] == 1 and fingers[1] == 1:
                     length, img, lineInfo = detector.findDistance(4, 8, img)
                     change_in_length = length - prvs_length
-                    if  15 > change_in_length > 5 :  # Close together
+                    if  30 > change_in_length > 10 :  # Close together
                         zoomIN = threading.Thread(target=zoom_in)
                         if not zoomIN.is_alive():
                             zoomIN.start()  # Zoom in
 
-                    elif -5 > change_in_length > -15 :  # Far apart
+                    elif -10 > change_in_length > -30 :  # Far apart
                         zoomOUT = threading.Thread(target=zoom_out)
                         if not zoomOUT.is_alive():
                             zoomOUT.start()  # Zoom out
