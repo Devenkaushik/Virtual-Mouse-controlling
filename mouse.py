@@ -5,9 +5,7 @@ import math
 import pyautogui
 import time
 import threading
-import face_detection as fd
 import sys
-
 
 class handDetector():
     def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
@@ -111,19 +109,7 @@ def zoom_out():
 def zoom_in():
     pyautogui.hotkey('ctrl', '+')
 
-is_known_face = ''
-def face(cap, sfr):
-    global is_known_face
-    is_known_face = fd.dtct_face(cap, sfr)
-
-
-def start_face(cap, sfr):
-    global face_t
-    face_t = threading.Thread(target=face, args=(cap, sfr))
-    face_t.start()
-
 def main():
-    global is_known_face
     # Define screen dimensions
     wCam, hCam = 640, 480
     frameR = 100  # Frame Reduction
@@ -147,20 +133,14 @@ def main():
     r_clicked = ""
     l_clicked = ""
 
-    sfr = fd.init_dtct_face()
-
-    start_face(cap, sfr)
-
     try:
         while True:
             # Capture frame from webcam
             success, img = cap.read()
             img = detector.findHands(img)
             lmList, bbox = detector.findPosition(img)
-            if not face_t.is_alive():
-                start_face(cap, sfr)
 
-            if len(lmList) != 0 and is_known_face == "yes":
+            if len(lmList) != 0:
                 x1, y1 = lmList[8][1:]
                 x2, y2 = lmList[12][1:]
 
@@ -188,7 +168,6 @@ def main():
                             l_clicked = True
                         else:
                             l_clicked = False
-                        
                 
                 if fingers[0] == 1 and fingers[1] == 0:
                     length, img, lineInfo = detector.findDistance(4, 12, img)
@@ -199,9 +178,8 @@ def main():
                             r_clicked = True
                     else:
                         r_clicked = False
-                    # Check if Thumb and Index Finger are up
+
                 if fingers[0] == 1 and fingers[1] == 1:
-                    # Calculate distance between thumb and index finger
                     length, img, lineInfo = detector.findDistance(4, 8, img)
                     change_in_length = length - prvs_length
                     if  15 > change_in_length > 5 :  # Close together
@@ -216,16 +194,6 @@ def main():
 
                     prvs_length = length
                 
-                #### TODO: scroll mode  
-                    # Check if Index and Middle Fingers are up
-                # if fingers[1] == 1 and fingers[2] == 1:
-                #         y1, y2 = lmList[8][2], lmList[12][2]  # y-coordinates of the fingers
-                #         # Vertical movement determines scroll direction
-                #         if y1 - y2 > 20:  # Move fingers up
-                #             pyautogui.scroll(10)  # Scroll up
-                #         elif y2 - y1 > 20:  # Move fingers down
-                #             pyautogui.scroll(-10)  # Scroll down
-
             # Mirror the image for better hand eye co_ordination.
             img = cv2.flip(img, 1)
 
@@ -239,7 +207,6 @@ def main():
             cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
             cv2.setWindowProperty(window_name, cv2.WND_PROP_TOPMOST, 1)
             cv2.resizeWindow(window_name, wCam, hCam)  
-
 
             # Display the image
             cv2.imshow(window_name, img)
@@ -263,4 +230,3 @@ if __name__ == "__main__":
           LAST BUT NOT THE LEAST:
           Please do not expect fluid functionality at this point of development as it is still in the alpha stage.\n""")
     main()
-    
